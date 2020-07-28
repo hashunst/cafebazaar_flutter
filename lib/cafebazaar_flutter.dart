@@ -54,6 +54,14 @@ class CafebazaarFlutter {
     dynamic result = await _channel.invokeMethod("getPurchase", args);
     return jsonDecode(result);
   }
+  
+  
+  static Future<dynamic> queryIsPurchaseAsync({@required String sku}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("sku", () => sku);
+    dynamic result = await _channel.invokeMethod("queryIsPurchaseAsync", args);
+    return result;
+  }
 
   static Future<dynamic> queryInventoryAsync({@required String sku}) async {
     Map<String, dynamic> args = <String, dynamic>{};
