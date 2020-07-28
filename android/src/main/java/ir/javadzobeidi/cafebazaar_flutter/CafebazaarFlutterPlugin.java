@@ -108,6 +108,10 @@ public class CafebazaarFlutterPlugin implements MethodChannel.MethodCallHandler 
                 sku = call.argument("sku");
                 getPurchase(sku);
                 break;
+            case "queryIsPurchaseAsync":
+                sku = call.argument("sku");
+                queryIsPurchaseAsync(sku);
+                break;
             case "queryInventoryAsync":
                 sku = call.argument("sku");
                 queryInventoryAsync(sku);
@@ -184,6 +188,21 @@ public class CafebazaarFlutterPlugin implements MethodChannel.MethodCallHandler 
             // Log.d(TAG, "Initial inventory query finished; enabling main UI.");
         }
     };
+    
+   private IabHelper.QueryInventoryFinishedListener mIsPurchaseListener = new IabHelper.QueryInventoryFinishedListener() {
+        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+            if (mHelper == null) return;
+            // Log.d(TAG, "Query inventory finished.");
+            if (result.isFailure()) {
+                // Log.d(TAG, "Failed to query inventory: " + result);
+                pendingResult.error("Inventory Listener Error", "Failed to query inventory: " + result, null);
+                return;
+            }
+            pendingResult.success(inventory.hasPurchase(SKU) + "");
+            // Log.d(TAG, "Initial inventory query finished; enabling main UI.");
+        }
+    };
+
 
     private void queryInventoryAsync(String sku) {
         List<String> additionalSkuList = new ArrayList<>();
@@ -191,6 +210,14 @@ public class CafebazaarFlutterPlugin implements MethodChannel.MethodCallHandler 
         additionalSkuList.add("ww");
         SKU = sku;
         mHelper.queryInventoryAsync(true, additionalSkuList, mGotInventoryListener);
+    }
+
+    private void queryIsPurchaseAsync(String sku) {
+        List<String> additionalSkuList = new ArrayList<>();
+        additionalSkuList.add(sku);
+        additionalSkuList.add("ww");
+        SKU = sku;
+        mHelper.queryInventoryAsync(true, additionalSkuList, mIsPurchaseListener);
     }
 
     private IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
